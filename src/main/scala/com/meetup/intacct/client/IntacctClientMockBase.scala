@@ -2,11 +2,11 @@ package com.meetup.intacct.client
 
 import scala.reflect.ClassTag
 
-class GenericOutgoingClientMock(
+class IntacctClientMockBase(
     getItemsResult: Either[Exception, Seq[_]] = Right(Seq()),
     createItemResult: Either[Exception, Option[Either[OperationFailure, OperationSuccess]]] = Right(None),
     createItemsResult: Either[Exception, Seq[Either[OperationFailure, OperationSuccess]]] = Right(Seq())
-) extends OutgoingClient {
+) extends IntacctClientBase {
 
   override def getItems[ItemT <: ResponseType[_]](
     query: Option[Query],

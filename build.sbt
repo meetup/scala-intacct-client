@@ -4,9 +4,8 @@ name := "scala-intacct-client"
 version := "1.0"
 scalaVersion := "2.11.8"
 
-// we consume the result of this to work around
-// a bug in intellij sbt plugin
-val _ = enablePlugins(IntacctJaxbPlugin)
+enablePlugins(IntacctJaxbPlugin)
+enablePlugins(NexusPlugin)
 
 IntacctJaxbPlugin.fluentApiSettings
 

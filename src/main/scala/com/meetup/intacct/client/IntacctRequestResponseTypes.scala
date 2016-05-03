@@ -1,7 +1,7 @@
 package com.meetup.intacct.client
 
 import com.meetup.intacct.request._
-import com.meetup.intacct.response.{Revrecscheduleentry, Revrecschedule, Gltransaction, Invoice}
+import com.meetup.intacct.response.{ Revrecscheduleentry, Revrecschedule, Gltransaction, Invoice }
 
 // For now, we will explicitly bless the types we know to work to avoid user error
 // These are final because the reflection in IntacctClient expects to find a JAXB

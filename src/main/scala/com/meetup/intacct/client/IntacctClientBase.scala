@@ -2,7 +2,7 @@ package com.meetup.intacct.client
 
 import scala.reflect.ClassTag
 
-trait OutgoingClient {
+trait IntacctClientBase {
 
   /**
    * Retreives items of type ItemT according to the passed Query if provided

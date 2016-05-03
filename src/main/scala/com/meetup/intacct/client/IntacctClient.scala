@@ -17,15 +17,15 @@ import com.meetup.intacct.request.{
   Request,
   Logical
 }
-import com.meetup.intacct.response.{Data, Error, Errormessage, Key, Response, Result, Operation => ResponseOperation}
-import java.io.{StringReader, StringWriter}
+import com.meetup.intacct.response.{ Data, Error, Errormessage, Key, Response, Result, Operation => ResponseOperation }
+import java.io.{ StringReader, StringWriter }
 import java.util.UUID
 import javax.xml.bind.JAXBContext
 
 import scala.collection.JavaConverters._
-import scala.concurrent.{Await, Future}
+import scala.concurrent.{ Await, Future }
 import scala.reflect.ClassTag
-import scala.util.{Failure, Success, Try}
+import scala.util.{ Failure, Success, Try }
 import sun.reflect.generics.reflectiveObjects.ParameterizedTypeImpl
 
 class IntacctClient(
@@ -33,9 +33,9 @@ class IntacctClient(
     sessionId: Option[String] = None,
     controlId1: Option[String] = None,
     controlId2: Option[String] = None
-) extends OutgoingClient with Logger {
+) extends IntacctClientBase with Logger {
 
-  this: OutgoingTransporter[HttpPostRequest, String] =>
+  this: IntacctTransporter[HttpPostRequest, String] =>
 
   // Passing these values into the constructor is preferred but it will autogenerate
   // if you're feeling lazy about it
@@ -80,7 +80,8 @@ class IntacctClient(
             q.filters.map { filter =>
               filter.expressionOrLogical.fold(
                 expression => expression,
-                logical => logical).asInstanceOf[Object]
+                logical => logical
+              ).asInstanceOf[Object]
             }.asJavaCollection
           })
       }

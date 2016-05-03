@@ -4,7 +4,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import dispatch._
 
-trait DispatchXmlHttpClient extends OutgoingTransporter[HttpPostRequest, String] with Logger {
+trait DispatchXmlHttpClient extends IntacctTransporter[HttpPostRequest, String] with Logger {
   override def request(request: HttpPostRequest): Future[String] = {
 
     Logger.debug(s"Posting request to ${request.url} with ${request.payload}")

@@ -3,9 +3,9 @@ package com.meetup.intacct.client
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 
-import com.meetup.intacct.request.{Expression, Logical}
+import com.meetup.intacct.request.{ Expression, Logical }
 
-import scala.language.{existentials, implicitConversions}
+import scala.language.{ existentials, implicitConversions }
 
 /**
  * Represents a new query
