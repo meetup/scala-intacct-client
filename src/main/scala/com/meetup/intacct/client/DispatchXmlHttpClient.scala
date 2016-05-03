@@ -12,7 +12,7 @@ trait DispatchXmlHttpClient extends OutgoingTransporter[HttpPostRequest, String]
     val req = url(request.url)
       .addHeader("Content-Type", "x-intacct-xml-request")
       .setBody(request.payload)
-      .setMethod("POST")
+      .POST
 
     HttpInstance.exec(req OK as.String)
   }
