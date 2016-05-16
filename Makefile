@@ -24,15 +24,15 @@ list:
 no_op__:
 
 package-sbt:
-	sbt test:test publishLocal
+	/usr/local/meetup/tools/sbt test:test publishLocal
 
 # We clean the locally cached version
 # of the jar when we're done publishing.
 publish-sbt: package-sbt component-test-sbt
-	sbt publish cleanLocal
+	/usr/local/meetup/tools/sbt publish cleanLocal
 
 component-test-sbt:
-	cd src/component/sbt && sbt component:test
+	cd src/component/sbt && /usr/local/meetup/tools/sbt component:test
 
 publish:
 	docker run \

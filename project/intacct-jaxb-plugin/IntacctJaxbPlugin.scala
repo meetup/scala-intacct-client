@@ -82,7 +82,7 @@ object IntacctJaxbPlugin extends AutoPlugin {
     ),
     libraryDependencies <++= (xjcLibs)(_.map(_ % XjcTool.name)),
     libraryDependencies <++= (xjcPlugins)(_.map(_ % XjcPlugin.name))
-  ) ++ xjcSettingsIn(Compile) ++ xjcSettingsIn(Test)
+  ) ++ xjcSettingsIn(Compile) //++ xjcSettingsIn(Test)
 
   /** Settings to enable the Fluent API plugin, that provides `withXxx` methods, in addition to `getXxx` and `setXxx`
     *  Requires this resolver http://download.java.net/maven/2/
