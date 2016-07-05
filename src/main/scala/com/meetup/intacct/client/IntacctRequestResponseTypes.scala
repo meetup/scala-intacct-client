@@ -9,7 +9,8 @@ import com.meetup.intacct.response.{
   Gltransaction => RespGltransaction,
   Contacttaxgroup => RespContacttaxgroup,
   Itemtaxgroup => RespItemtaxgroup,
-  _}
+  _
+}
 
 ///
 /// Request types
@@ -708,5 +709,4 @@ final class VendorentityaccountItem(underlying: Vendorentityaccount) extends Res
 final class VendorprefItem(underlying: Vendorpref) extends ResponseType[Vendorpref](underlying)
 
 final class EmployeeprefItem(underlying: Employeepref) extends ResponseType[Employeepref](underlying)
-
 
