@@ -1,11 +1,10 @@
-import IntacctJaxbPlugin.autoImport._
-
 name := "scala-intacct-client"
 version := "1.0"
 scalaVersion := "2.11.8"
 
 enablePlugins(IntacctJaxbPlugin)
-enablePlugins(NexusPlugin)
+enablePlugins(CommonSettingsPlugin)
+enablePlugins(CoverallsWrapper)
 
 IntacctJaxbPlugin.fluentApiSettings
 
@@ -19,3 +18,5 @@ libraryDependencies ++= Seq(
   "com.sun.xml.bind" % "jaxb-impl" % "2.2.3-1"
 )
 scalacOptions ++= Seq("-unchecked", "-deprecation", "-feature", "-Xfatal-warnings")
+
+licenses in ThisBuild += ("MIT", url("http://opensource.org/licenses/MIT"))
