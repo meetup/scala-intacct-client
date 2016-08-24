@@ -10,6 +10,7 @@ IntacctJaxbPlugin.fluentApiSettings
 
 xjcRequestDtd := file(".") / "src" / "main" / "resources" / "dtd" / "intacct_request.v2.1.dtd"
 xjcResponseDtd := file(".") / "src" / "main" / "resources" / "dtd" / "intacct_response.v2.1.dtd"
+xjcBindings := Seq((file(".") / "src" / "main" / "resources" / "dtd" / "bindings.xjb").toString)
 
 libraryDependencies ++= Seq(
   "net.databinder.dispatch" %% "dispatch-core" % "0.11.2",

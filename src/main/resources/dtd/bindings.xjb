@@ -1,0 +1,5 @@
+<xml-java-binding-schema>
+  <element name="exch_rate_date" type="class" class="Exch_Rate_Date" />
+  <element name="exch_rate_type_id" type="class" class="Exch_Rate_Type_Id" />
+  <element name="base_price" type="class" class="Base_Price" />
+</xml-java-binding-schema>
