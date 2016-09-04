@@ -2,7 +2,6 @@ package com.meetup.intacct.client
 
 import scala.concurrent.Future
 
-
 /**
  * An intacct client that will dutifully handle any response you choose to pass to it
  */

@@ -78,10 +78,7 @@ class IntacctClient(
         list.withFilter(new RequestFilter()
           .withLogicalOrExpression {
             q.filters.map { filter =>
-              filter.expressionOrLogical.fold(
-                expression => expression,
-                logical => logical
-              ).asInstanceOf[Object]
+              filter.toJaxb
             }.asJavaCollection
           })
       }
