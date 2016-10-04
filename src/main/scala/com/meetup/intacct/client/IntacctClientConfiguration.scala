@@ -1,6 +1,5 @@
 package com.meetup.intacct.client
 
-import scala.concurrent.duration.Duration
 import scala.concurrent.duration._
 
 case class IntacctClientConfiguration(

@@ -52,7 +52,7 @@ class IntacctClient(
    * @tparam ItemT
    * @return
    */
-  def getListXml[ItemT <: ResponseType[_]](query: Option[Query] = None, fields: Option[Iterable[String]] = None)(implicit ct: ClassTag[ItemT]): String = {
+  def getListXml[ItemT <: ResponseType[_]](filter: Option[Filter] = None, fields: Iterable[String] = Seq())(implicit ct: ClassTag[ItemT]): String = {
 
     // Taking advantage of the fact that jaxb
     // will always name the class after the object
@@ -72,24 +72,22 @@ class IntacctClient(
       val list = new GetList()
         .withObject(`object`)
 
-      val listWithFilters = query.fold {
+      val listWithFilters = filter.fold {
         list
-      } { q =>
+      } { ftr =>
         list.withFilter(new RequestFilter()
           .withLogicalOrExpression {
-            q.filters.map { filter =>
-              filter.toJaxb
-            }.asJavaCollection
+            ftr.toJaxb.asInstanceOf[Object]
           })
       }
 
-      fields.fold {
-        listWithFilters
-      } { f =>
+      if (fields.nonEmpty) {
         listWithFilters.withFields(new Fields()
           .withField(
-            f.map(new Field().withvalue(_)).asJavaCollection
+            fields.map(new Field().withvalue(_)).asJavaCollection
           ))
+      } else {
+        listWithFilters
       }
     }
 
@@ -198,7 +196,7 @@ class IntacctClient(
     handleResponse(createItemXml[ItemT](template), processResults)
   }
 
-  override def getItems[ItemT <: ResponseType[_]](query: Option[Query] = None, fields: Option[Iterable[String]] = None)(implicit ct: ClassTag[ItemT]): Either[Exception, Seq[ItemT]] = {
+  override def getItems[ItemT <: ResponseType[_]](filter: Option[Filter] = None, fields: Iterable[String] = Seq())(implicit ct: ClassTag[ItemT]): Either[Exception, Seq[ItemT]] = {
 
     val processResults: (Seq[Result]) => Try[Seq[ItemT]] =
       (results) => {
@@ -235,7 +233,7 @@ class IntacctClient(
         }
       }
 
-    handleResponse(getListXml[ItemT](query, fields), processResults)
+    handleResponse(getListXml[ItemT](filter, fields), processResults)
   }
 
   /**

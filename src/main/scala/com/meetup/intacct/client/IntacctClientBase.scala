@@ -13,7 +13,7 @@ trait IntacctClientBase {
    * @tparam ItemT
    * @return Matching items or an error
    */
-  def getItems[ItemT <: ResponseType[_]](query: Option[Query], fields: Option[Iterable[String]] = None)(implicit ct: ClassTag[ItemT]): Either[Exception, Seq[ItemT]]
+  def getItems[ItemT <: ResponseType[_]](query: Option[Filter], fields: Iterable[String] = Seq())(implicit ct: ClassTag[ItemT]): Either[Exception, Seq[ItemT]]
 
   /**
    * Creates items of type ItemT according to the passed template

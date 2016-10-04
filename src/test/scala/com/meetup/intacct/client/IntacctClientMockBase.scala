@@ -9,8 +9,8 @@ class IntacctClientMockBase(
 ) extends IntacctClientBase {
 
   override def getItems[ItemT <: ResponseType[_]](
-    query: Option[Query],
-    fields: Option[Iterable[String]]
+    query: Option[Filter],
+    fields: Iterable[String]
   )(implicit ct: ClassTag[ItemT]): Either[Exception, Seq[ItemT]] =
     getItemsResult.asInstanceOf[Either[Exception, Seq[ItemT]]]
 
