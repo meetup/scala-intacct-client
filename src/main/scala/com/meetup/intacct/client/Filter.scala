@@ -3,15 +3,13 @@ package com.meetup.intacct.client
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 
-import com.meetup.intacct.request.{Expression, Logical}
+import com.meetup.intacct.request.{Expression, Field, Logical, Value}
 
 import scala.language.{existentials, implicitConversions}
 import scala.collection.JavaConverters._
-import com.meetup.intacct.request.Field
-import com.meetup.intacct.request.Value
 
 /**
- * A class representing a single filter for a query. The root of the filter can either contain a Logical or an Expression
+ * A trait representing a single or compound filter.
  */
 sealed trait Filter {
   type T
@@ -21,18 +19,29 @@ sealed trait Filter {
   final def or(other: Filter) =
     FilterLogical(Operator.or, Seq(this, other))
 }
+
+/**
+ * Useful helper methods to simplify creating filters.
+ *
+ *     import com.meetup.intacct.client.DSL._
+ *     "my_field_name" is "my_value"
+ *
+ * rather than
+ *
+ *     FilterExpression("my_field_name", Operator.`=`, "my_value")
+ */
 object DSL {
   implicit class filterFromFieldName(fieldName: String) {
-    def is(value: QueryValue[_]) = FilterExpression(fieldName, Operator.`=`, value)
-    def gt(value: QueryValue[_]) = FilterExpression(fieldName, Operator.>, value)
-    def lt(value: QueryValue[_]) = FilterExpression(fieldName, Operator.<, value)
-    def like(value: QueryValue[_]) = FilterExpression(fieldName, Operator.like, value)
+    def is(value: FilterValue[_]) = FilterExpression(fieldName, Operator.`=`, value)
+    def gt(value: FilterValue[_]) = FilterExpression(fieldName, Operator.>, value)
+    def lt(value: FilterValue[_]) = FilterExpression(fieldName, Operator.<, value)
+    def like(value: FilterValue[_]) = FilterExpression(fieldName, Operator.like, value)
   }
 }
 case class FilterExpression(
     val fieldName: String,
-    val operator: QueryOperator,
-    val value: QueryValue[_]) extends Filter {
+    val operator: FilterOperator,
+    val value: FilterValue[_]) extends Filter {
   override type T = Expression
   override def toJaxb: T =
     new Expression()
@@ -50,31 +59,33 @@ case class FilterLogical(
       .withLogicalOrExpression(clauses.map(_.toJaxb.asInstanceOf[Object]).asJavaCollection)
 }
 
+sealed trait FilterOperator
+sealed trait LogicalOperator
+
 /**
  * All available filter operators are members of this object
  */
-sealed trait QueryOperator
-sealed trait LogicalOperator
 object Operator {
-  case object `=` extends QueryOperator { override def toString = "=" }
-  case object > extends QueryOperator { override def toString = ">" }
-  case object < extends QueryOperator { override def toString = "<" }
-  case object like extends QueryOperator { override def toString = "like" }
+  case object `=` extends FilterOperator { override def toString = "=" }
+  case object > extends FilterOperator { override def toString = ">" }
+  case object < extends FilterOperator { override def toString = "<" }
+  case object like extends FilterOperator { override def toString = "like" }
   case object and extends LogicalOperator { override def toString = "and" }
   case object or extends LogicalOperator { override def toString = "or" }
 }
 
-// These types are allowed as filter values
-abstract class QueryValue[T](v: T) {
+// These types are allowed as filter values. The implicit conversions should
+// happen without needing to import anything.
+abstract class FilterValue[T](v: T) {
   def repr: String
 }
-object QueryValue {
-  implicit def stringToQueryValue(s: String): StringValue = new StringValue(s)
-  implicit def dateToQueryValue(d: ZonedDateTime): DateValue = new DateValue(d)
+object FilterValue {
+  implicit def stringToFilterValue(s: String): StringValue = new StringValue(s)
+  implicit def dateToFilterValue(d: ZonedDateTime): DateValue = new DateValue(d)
 }
-class StringValue(v: String) extends QueryValue[String](v) {
+class StringValue(v: String) extends FilterValue[String](v) {
   override def repr: String = v
 }
-class DateValue(v: ZonedDateTime) extends QueryValue[ZonedDateTime](v) {
+class DateValue(v: ZonedDateTime) extends FilterValue[ZonedDateTime](v) {
   override def repr: String = v.format(DateTimeFormatter.ofPattern("dd/MM/yyyy"))
 }

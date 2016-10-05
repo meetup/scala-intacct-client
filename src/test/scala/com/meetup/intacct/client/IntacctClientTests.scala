@@ -9,6 +9,7 @@ import scala.collection.JavaConverters._
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.reflect.ClassTag
+import scala.util.Failure
 import com.meetup.intacct.request.{
   Request,
   Expression,
@@ -26,7 +27,8 @@ import com.meetup.intacct.request.{
   Fields,
   CreateApaccountlabel,
   Accountlabel,
-  Glaccountno }
+  Glaccountno
+}
 import com.meetup.intacct.response.{
   Error,
   Response,
@@ -35,7 +37,8 @@ import com.meetup.intacct.response.{
   Key,
   Errormessage,
   Apaccountlabel,
-  Data }
+  Data
+}
 
 object Helper {
   def jaxbToString[T: ClassTag](jaxb: T): String = {
@@ -58,7 +61,7 @@ object Helper {
 }
 
 class IntacctClientTests extends FunSpec with Matchers {
-  describe("Query filters") {
+  describe("Filters") {
     it("should properly handle simple filter expressions") {
       val filter1 = "myField" is "123"
       val filter2 = "myField" like "345"
@@ -142,7 +145,7 @@ class IntacctClientTests extends FunSpec with Matchers {
     }
 
     it("should work for some randomly complex thing") {
-      val filter = ((("field1" is "123") or ("field2" lt "987")) and ("field3" gt "146")) or ("field4" like "iii")
+      val filter = ("field1" is "123") or ("field2" lt "987") and ("field3" gt "146") or ("field4" like "iii")
       val expected = new Logical()
         .withLogicalOperator("or")
         .withLogicalOrExpression(
@@ -307,6 +310,59 @@ class IntacctClientTests extends FunSpec with Matchers {
       clientWithMockTransport.createItems(Seq(requestItem)) shouldBe Right(Seq(Left(OperationFailure("456", Seq(ErrorMessage("444", "d1d2", "cor"))))))
     }
 
+    it("createItems should fail when the response fails") {
+      val requestItem = CreateApaccountlabelItem(new CreateApaccountlabel())
+      val clientWithMockTransport = Helper.createClientMock(Future.failed(new Exception()))
+
+      clientWithMockTransport.createItems(Seq(requestItem)) match {
+        case Left(_: Exception) =>
+        case _ => fail
+      }
+
+    }
+
+    it("createItems should fail when there's an error at Operation") {
+      val requestItem = CreateApaccountlabelItem(new CreateApaccountlabel())
+
+      val response = new Response()
+        .withOperationOrErrormessage(
+          new Errormessage().withError(
+            new Error()
+              .withCorrection("cor")
+              .withDescription("d1")
+              .withDescription2("d2")
+              .withErrorno("444")))
+
+      val clientWithMockTransport = Helper.createClientMock(Future(Helper.jaxbToString(response)))
+
+      clientWithMockTransport.createItems(Seq(requestItem)) match {
+        case Left(_: Exception) =>
+        case _ => fail
+      }
+    }
+
+    it("createItems should fail when there's an error at Result") {
+      val requestItem = CreateApaccountlabelItem(new CreateApaccountlabel())
+
+      val response = new Response()
+        .withOperationOrErrormessage(
+          new ResponseOperation()
+            .withErrormessageOrResult(
+              new Errormessage().withError(
+                new Error()
+                  .withCorrection("cor")
+                  .withDescription("d1")
+                  .withDescription2("d2")
+                  .withErrorno("444"))))
+
+      val clientWithMockTransport = Helper.createClientMock(Future(Helper.jaxbToString(response)))
+
+      clientWithMockTransport.createItems(Seq(requestItem)) match {
+        case Left(_: Exception) =>
+        case _ => fail
+      }
+    }
+
     it("getItems should succeed when the response is expected") {
       val requestItem = GetListItem(new GetList())
 
@@ -318,8 +374,9 @@ class IntacctClientTests extends FunSpec with Matchers {
             .withErrormessageOrResult(
               new Result()
                 .withStatus("success")
-                .withData(new Data()
-                  .withItems(items: _*))))
+                .withData(
+                  new Data()
+                    .withItems(items: _*))))
 
       val clientWithMockTransport = Helper.createClientMock(Future(Helper.jaxbToString(response)))
 
@@ -341,12 +398,66 @@ class IntacctClientTests extends FunSpec with Matchers {
               new Result()
                 .withStatus("failure")
                 .withControlid("456")
-                .withErrormessage(new Errormessage().withError(
-                  new Error()
-                    .withCorrection("cor")
-                    .withDescription("d1")
-                    .withDescription2("d2")
-                    .withErrorno("444")))))
+                .withErrormessage(
+                  new Errormessage().withError(
+                    new Error()
+                      .withCorrection("cor")
+                      .withDescription("d1")
+                      .withDescription2("d2")
+                      .withErrorno("444")))))
+
+      val clientWithMockTransport = Helper.createClientMock(Future(Helper.jaxbToString(response)))
+
+      clientWithMockTransport.getItems[ApaccountlabelItem]() match {
+        case Left(_: Exception) =>
+        case _ => fail
+      }
+    }
+
+    it("getItems should fail when the response fails") {
+      val requestItem = CreateApaccountlabelItem(new CreateApaccountlabel())
+      val clientWithMockTransport = Helper.createClientMock(Future.failed(new Exception()))
+
+      clientWithMockTransport.getItems[ApaccountlabelItem]() match {
+        case Left(_: Exception) =>
+        case _ => fail
+      }
+
+    }
+
+    it("getItems should fail when there's an error at Operation") {
+      val requestItem = GetListItem(new GetList())
+
+      val response = new Response()
+        .withOperationOrErrormessage(
+          new Errormessage().withError(
+            new Error()
+              .withCorrection("cor")
+              .withDescription("d1")
+              .withDescription2("d2")
+              .withErrorno("444")))
+
+      val clientWithMockTransport = Helper.createClientMock(Future(Helper.jaxbToString(response)))
+
+      clientWithMockTransport.getItems[ApaccountlabelItem]() match {
+        case Left(_: Exception) =>
+        case _ => fail
+      }
+    }
+
+    it("getItems should fail when there's an error at Result") {
+      val requestItem = GetListItem(new GetList())
+
+      val response = new Response()
+        .withOperationOrErrormessage(
+          new ResponseOperation()
+            .withErrormessageOrResult(
+              new Errormessage().withError(
+                new Error()
+                  .withCorrection("cor")
+                  .withDescription("d1")
+                  .withDescription2("d2")
+                  .withErrorno("444"))))
 
       val clientWithMockTransport = Helper.createClientMock(Future(Helper.jaxbToString(response)))
 
