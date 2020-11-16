@@ -52,7 +52,7 @@ class IntacctClient(
    * @tparam ItemT
    * @return
    */
-  def getListXml[ItemT <: ResponseType[_]](query: Option[Query] = None, fields: Option[Iterable[String]] = None)(implicit ct: ClassTag[ItemT]): String = {
+  def getListXml[ItemT <: ResponseType[_]](filter: Option[Filter] = None, fields: Iterable[String] = Seq())(implicit ct: ClassTag[ItemT]): String = {
 
     // Taking advantage of the fact that jaxb
     // will always name the class after the object
@@ -72,27 +72,22 @@ class IntacctClient(
       val list = new GetList()
         .withObject(`object`)
 
-      val listWithFilters = query.fold {
+      val listWithFilters = filter.fold {
         list
-      } { q =>
+      } { ftr =>
         list.withFilter(new RequestFilter()
           .withLogicalOrExpression {
-            q.filters.map { filter =>
-              filter.expressionOrLogical.fold(
-                expression => expression,
-                logical => logical
-              ).asInstanceOf[Object]
-            }.asJavaCollection
+            ftr.toJaxb.asInstanceOf[Object]
           })
       }
 
-      fields.fold {
-        listWithFilters
-      } { f =>
+      if (fields.nonEmpty) {
         listWithFilters.withFields(new Fields()
           .withField(
-            f.map(new Field().withvalue(_)).asJavaCollection
+            fields.map(new Field().withvalue(_)).asJavaCollection
           ))
+      } else {
+        listWithFilters
       }
     }
 
@@ -201,7 +196,7 @@ class IntacctClient(
     handleResponse(createItemXml[ItemT](template), processResults)
   }
 
-  override def getItems[ItemT <: ResponseType[_]](query: Option[Query] = None, fields: Option[Iterable[String]] = None)(implicit ct: ClassTag[ItemT]): Either[Exception, Seq[ItemT]] = {
+  override def getItems[ItemT <: ResponseType[_]](filter: Option[Filter] = None, fields: Iterable[String] = Seq())(implicit ct: ClassTag[ItemT]): Either[Exception, Seq[ItemT]] = {
 
     val processResults: (Seq[Result]) => Try[Seq[ItemT]] =
       (results) => {
@@ -238,7 +233,7 @@ class IntacctClient(
         }
       }
 
-    handleResponse(getListXml[ItemT](query, fields), processResults)
+    handleResponse(getListXml[ItemT](filter, fields), processResults)
   }
 
   /**
@@ -362,21 +357,4 @@ object IntacctClient {
     controlId1: Option[String] = None,
     controlId2: Option[String] = None
   ) = new IntacctClient(config) with DispatchXmlHttpClient
-}
-
-/**
- * An intacct client that will dutifully handle any response you choose to pass to it
- */
-
-object IntacctClientMock {
-  def apply(
-    config: IntacctClientConfiguration,
-    response: Future[String],
-    sessionId: Option[String] = None,
-    controlId1: Option[String] = None,
-    controlId2: Option[String] = None
-  ) =
-    new IntacctClient(config, sessionId, controlId1, controlId2) with HttpClientMock with HttpPostResponseProvider {
-      def getResponse(req: HttpPostRequest): Future[String] = response
-    }
 }
